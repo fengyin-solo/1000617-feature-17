@@ -33,3 +33,10 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .link { border: none; background: none; color: var(--brand); cursor: pointer; padding: 0; }
 .page-foot { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--muted); }
 .error-text { color: #b42318; }
+.ok-text { color: #067647; }
+[data-module="consume"] .create-panel { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+[data-module="consume"] .create-panel .filter-item span { display: block; font-size: 12px; color: var(--muted); }
+[data-module="consume"] .create-panel input, [data-module="consume"] .create-panel select, [data-module="consume"] .filter-item select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; }
+[data-module="consume"] .flow-row > td { background: #f8fafc; }
+[data-module="consume"] .flow-table th, [data-module="consume"] .flow-table td { font-size: 12px; }
+[data-module="consume"] .section-title { font-size: 14px; margin: 16px 0 8px; }

@@ -74,3 +74,9 @@ npm run dev
   `backend/app/routers/<模块>.py`，业务规则在 `backend/app/services/<模块>.py`。
 - 列表接口统一返回 `{ items, total, page, size }`，动作接口统一返回 `{ ok, message }`。
 - 状态流转只允许在 `app/services` 里改，路由层不做业务判断。
+- 耗材领用按 待审批 → 已批准 → 已领用 流转，退回进入 已退回 并必须记录退回原因；
+  审批环节校验同一物料同一科室同时段申领合计不超过库存上限，发放时库存不足会拦下而不是扣成负数。
+- 耗材领用与试剂台账两张表会落盘到 `backend/data/store_state.json`（可用环境变量
+  `LIMS_STORE_FILE` 改路径），刷新页面或重启服务后流转记录与结存数量都保留；
+  删除该文件即可回到示例数据。
+- 耗材领用的回归测试在 `backend/tests/test_consume_flow.py`，运行：`cd backend && .venv/bin/python -m pytest tests/`。

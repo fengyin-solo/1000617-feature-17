@@ -30,6 +30,19 @@ def list_entries(
     return PageResult(items=items, total=total, page=page, size=size)
 
 
+@router.get("/stats")
+def consume_stats() -> dict[str, Any]:
+    """领用统计：顶部卡片与科室汇总，状态流转后实时重算。"""
+    return {"summary": service.summary(), "departments": service.department_stats()}
+
+
+@router.get("/export")
+def export_entries() -> dict[str, Any]:
+    """导出耗材领用清单：返回当前过滤条件下的全量数据。"""
+    items, total = service.list_entries(page=1, size=10000)
+    return {"module": "consume", "total": total, "items": items}
+
+
 @router.get("/{entry_id}", response_model=dict)
 def get_entry(entry_id: int) -> dict:
     """读取单条领用单明细；不存在时给出可读的错误说明。"""
@@ -41,25 +54,20 @@ def get_entry(entry_id: int) -> dict:
 
 @router.post("", response_model=ActionResult)
 def create_entry(payload: EntryPayload) -> ActionResult:
-    """登记一条领用单，缺字段时说明原因而不是静默丢弃。"""
-    entry, missing = service.create_entry(payload.values)
-    if missing:
-        return ActionResult(ok=False, message=f"缺少必填字段：{'、'.join(missing)}")
-    return ActionResult(ok=True, message="领用单已登记", entry=entry)
+    """登记一条领用单，缺字段或数量不合法时说明原因而不是静默丢弃。"""
+    entry, errors = service.create_entry(payload.values)
+    if errors:
+        return ActionResult(ok=False, message="；".join(errors))
+    return ActionResult(ok=True, message="领用单已登记，等待审批", entry=entry)
 
 
 @router.post("/{entry_id}/actions", response_model=ActionResult)
 def run_action(entry_id: int, payload: EntryPayload) -> ActionResult:
     """对单条领用单执行批准领用、确认发放、退回物料；不允许的动作会被拦下并说明原因。"""
     action = str(payload.values.get("action") or "").strip()
-    entry, message = service.run_action(entry_id, action)
+    reason = str(payload.values.get("退回原因") or payload.values.get("reason") or "")
+    operator = str(payload.values.get("操作人") or payload.values.get("operator") or "")
+    entry, message = service.run_action(entry_id, action, reason=reason, operator=operator)
     if entry is None:
         return ActionResult(ok=False, message=message)
     return ActionResult(ok=True, message=message, entry=entry)
-
-
-@router.get("/export")
-def export_entries() -> dict[str, Any]:
-    """导出耗材领用清单：返回当前过滤条件下的全量数据。"""
-    items, total = service.list_entries(page=1, size=10000)
-    return {"module": "consume", "total": total, "items": items}
