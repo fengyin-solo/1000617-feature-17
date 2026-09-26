@@ -85,3 +85,6 @@ desktop.ini
 *.db
 *.pid
 *.seed
+
+# ===== 本地数据快照（耗材领用流转留痕）=====
+backend/data/

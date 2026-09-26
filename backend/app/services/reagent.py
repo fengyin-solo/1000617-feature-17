@@ -44,6 +44,7 @@ class ReagentService:
         entry["pending"] = True
         entry["abnormal"] = False
         rows.append(entry)
+        store.save()
         return entry, []
 
     def run_action(self, entry_id: int, action: str) -> tuple[dict[str, Any] | None, str]:
@@ -58,4 +59,9 @@ class ReagentService:
         entry["status"] = target
         entry["pending"] = target != STATUS_ORDER[-1]
         entry["abnormal"] = action in NEGATIVE_ACTIONS
+        if target in {"已冻结", "已耗尽"}:
+            entry["物料状态"] = target
+        elif target == "正常可用":
+            entry["物料状态"] = target
+        store.save()
         return entry, f"试剂物料已{action}"
